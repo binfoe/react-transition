@@ -1,0 +1,61 @@
+{
+  "name": "reactrans",
+  "version": "0.0.2",
+  "description": "simple react transition and transition-group library",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "esnext": "dist/index.mjs",
+  "types": "src/index.ts",
+  "scripts": {
+    "bundle": "ts-node --project tsconfig.json scripts/esbuild.ts",
+    "build": "pnpm lint && rm -rf dist && NODE_ENV=production pnpm bundle",
+    "watch": "WATCH=true pnpm bundle",
+    "lint": "tsc --noEmit && eslint './{src,scripts}/**/*.{ts,tsx}' --fix",
+    "lint-staged": "lint-staged",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.{js,ts}": "eslint --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/binfoe/react-transition.git"
+  },
+  "keywords": [
+    "react",
+    "transition",
+    "transition-group"
+  ],
+  "author": "Yuhang Ge <abeyuhang@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/binfoe/react-transition/issues"
+  },
+  "homepage": "https://github.com/binfoe/react-transition#readme",
+  "devDependencies": {
+    "@types/node": "^20.11.16",
+    "@types/react": "^18.2.55",
+    "@types/react-dom": "^18.2.19",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "esbuild": "^0.20.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-define-config": "^2.1.0",
+    "eslint-plugin-import": "npm:eslint-plugin-i@^2.29.1",
+    "eslint-plugin-prettier": "^5.1.3",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "husky": "^9.0.10",
+    "lint-staged": "^15.2.2",
+    "prettier": "^3.2.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "react": "*"
+  }
+}
