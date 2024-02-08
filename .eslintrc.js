@@ -30,7 +30,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['./scripts/**/*.ts'],
+      files: ['./scripts/**/*.ts', '*.js'],
       env: { node: true, browser: false },
       rules: {
         'no-console': 'off',
