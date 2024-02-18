@@ -16,6 +16,7 @@ module.exports = {
     project: ['./tsconfig.json'],
   },
   rules: {
+    'prefer-template': 'error',
     'import/order': 'error',
     'import/no-unresolved': 'off',
     '@typescript-eslint/no-unused-vars': 'error',
@@ -26,6 +27,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/prefer-optional-chain': 'error',
+    '@typescript-eslint/prefer-nullish-coalescing': 'error',
     '@typescript-eslint/consistent-type-imports': 'error',
   },
   overrides: [

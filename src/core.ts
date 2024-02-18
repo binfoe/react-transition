@@ -54,10 +54,10 @@ export function applyTransition<T extends Element>({
   el: T;
   cbs: TransitionCallbacks<T>;
 }) {
-  const fromClass = clsarr(isEnter ? cs.enterFrom : cs.leaveFrom);
+  const fromClass = clsarr(isEnter ? cs.enterFrom ?? cs.leaveTo : cs.leaveFrom ?? cs.enterTo);
   const activeClass = clsarr(isEnter ? cs.enterActive : cs.leaveActive);
-  const toClass = clsarr(isEnter ? cs.enterTo : cs.leaveTo);
-  const doneClass = clsarr(isEnter ? cs.enterDone || cs.enterTo : cs.leaveDone || cs.leaveTo);
+  const toClass = clsarr(isEnter ? cs.enterTo ?? cs.leaveFrom : cs.leaveTo ?? cs.enterFrom);
+  const doneClass = clsarr(isEnter ? cs.enterDone ?? cs.enterTo : cs.leaveDone ?? cs.leaveTo);
   const preDoneClass = clsarr(isEnter ? `${cs.leaveDone} ${cs.leaveTo}` : `${cs.enterDone} ${cs.enterTo}`);
   el.classList.remove(...preDoneClass);
   el.classList.add(...fromClass);

@@ -5,6 +5,6 @@
   "prettier.configPath": ".prettierrc.js",
   // "prettier.prettierPath": "node_modules/prettier",
   "editor.codeActionsOnSave": {
-    "source.fixAll": true
+    "source.fixAll": "explicit"
   }
 }

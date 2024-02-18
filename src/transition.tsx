@@ -95,7 +95,7 @@ export const Transition = forwardRef<Element, Props>(
     return mounted ? (
       <TransitionInner
         isEnter={realEnter}
-        appear={(first.current && appear) || !first.current}
+        appear={(first.current && !!appear) || !first.current}
         onAfterLeave={(el) => {
           onAfterLeave?.(el);
           // console.log('AFTER LEAVE');

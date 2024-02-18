@@ -6,10 +6,12 @@ interface Item {
   key: Key;
   node: ReactElement;
 }
+type TransitionGroupElement = Omit<ReactElement, 'key'> & { key: string };
+
 const W: FC<{ children: ReactNode }> = ({ children }) => {
   return children;
 };
-function k(children: ReactElement[], onLeave: (key: Key) => void, appear = false) {
+function k(children: TransitionGroupElement[], onLeave: (key: Key) => void, appear = false) {
   return children.map((node) => {
     const key = node.key;
     const item = cloneElement(node, {
@@ -17,7 +19,7 @@ function k(children: ReactElement[], onLeave: (key: Key) => void, appear = false
       isEnter: true,
       appear,
       onAfterLeave() {
-        onLeave(key);
+        onLeave(key as Key);
       },
     });
     return {
@@ -28,7 +30,7 @@ function k(children: ReactElement[], onLeave: (key: Key) => void, appear = false
   });
 }
 export const TransitionGroup: FC<{
-  children: ReactElement[];
+  children: TransitionGroupElement[];
 }> = ({ children }) => {
   const memoList = useMemo<Item[]>(() => k(children, onLeave), []);
   const refList = useRef(memoList);

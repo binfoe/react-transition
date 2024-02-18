@@ -6,6 +6,7 @@
     "target": "ES2022",
     "jsx": "react-jsx",
     "noImplicitAny": true,
+    "strictNullChecks": true,
     "noImplicitReturns": true,
     "stripInternal": true,
     "alwaysStrict": true,
