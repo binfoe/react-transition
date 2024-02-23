@@ -1,6 +1,6 @@
 {
   "name": "reactrans",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "simple react transition and transition-group library",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
