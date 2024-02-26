@@ -8,7 +8,7 @@ export interface TransitionCallbacks {
   onLeaveCancelled?(): void;
 }
 
-type Props = {
+export type TransitionInnerProps = {
   children: ReactElement;
   destroyAfterLeave?: boolean;
   isEnter?: boolean;
@@ -16,17 +16,21 @@ type Props = {
   leave?: string;
   enterActive?: string;
   leaveActive?: string;
+  appear?: boolean;
 };
 
 const TransitionInner: FC<
-  Props & {
+  TransitionInnerProps & {
     onAfterEnter(el: HTMLElement): void;
     onAfterLeave(el: HTMLElement): void;
     onMounted(el: Element): void;
   }
 > = ({ children, isEnter, onMounted, ...props }) => {
   const ref = useRef<HTMLElement>(null);
-  const stepRef = useRef(0);
+  /**
+   * next step, 0b00: enter, 0b10: leave，0b01: after enter, 0b11: after leave
+   */
+  const stepRef = useRef(0b00);
   const originalClass = useMemo(() => children.props.className ?? '', []);
 
   const getcls = () => `${originalClass} ${isEnter ? props.enter ?? '' : props.leave ?? ''}`;
@@ -38,15 +42,15 @@ const TransitionInner: FC<
     const el = ref?.current;
     if (!el) return;
 
-    stepRef.current = isEnter ? 10 : 20;
+    stepRef.current = isEnter ? 0b00 : 0b10;
     setClassName(originalClass);
   };
 
   useEffect(() => {
     const step = stepRef.current;
-    if (step === 10 || step === 20) {
-      const acls = step === 10 ? props.enterActive : props.leaveActive;
-      stepRef.current += 1;
+    if (step === 0b00 || step === 0b10) {
+      const acls = step === 0b00 ? props.enterActive : props.leaveActive;
+      stepRef.current |= 0b01;
       setClassName(`${getcls()} ${acls ?? ''}`);
     }
   }, [className]);
@@ -65,9 +69,9 @@ const TransitionInner: FC<
 
     const onEnd = () => {
       if (!ref.current) return;
-      if (stepRef.current === 21) {
+      if (stepRef.current === 0b11) {
         props.onAfterLeave?.(ref.current);
-      } else if (stepRef.current === 11) {
+      } else if (stepRef.current === 0b01) {
         props.onAfterEnter?.(ref.current);
       }
     };
@@ -83,12 +87,19 @@ const TransitionInner: FC<
   });
 };
 
-type TransitionProps = Props & TransitionCallbacks;
+export type TransitionProps = TransitionInnerProps & TransitionCallbacks;
 
+enum TState {
+  Entering,
+  Entered,
+  Leaving,
+  Leaved,
+}
 export const Transition = forwardRef<Element, TransitionProps>(
   (
     {
-      destroyAfterLeave = false,
+      destroyAfterLeave,
+      appear,
       onAfterLeave,
       onAfterEnter,
       onEnterCancelled,
@@ -98,28 +109,28 @@ export const Transition = forwardRef<Element, TransitionProps>(
     },
     ref,
   ) => {
-    const [mounted, setMounted] = useState(!destroyAfterLeave || isEnter);
-    const [realEnter, setRealEnter] = useState(isEnter);
-    const state = useRef(isEnter ? 12 : 22); //
+    const [mounted, setMounted] = useState(!destroyAfterLeave || (appear ? !isEnter : isEnter));
+    const [realEnter, setRealEnter] = useState(appear ? !isEnter : isEnter);
+    const state = useRef((appear ? !isEnter : isEnter) ? TState.Entered : TState.Leaved);
 
     useEffect(() => {
       if (!destroyAfterLeave) {
         setRealEnter(isEnter);
       } else {
         if (isEnter) {
-          if (state.current === 21) {
+          if (state.current === TState.Leaving) {
             onLeaveCancelled?.();
-            state.current = 11; // entering
+            state.current = TState.Entering;
             setRealEnter(true);
           } else {
             setMounted(true);
           }
         } else {
-          if (state.current === 11 || state.current === 12) {
-            if (state.current === 11) {
+          if (state.current === TState.Entering || state.current === TState.Entered) {
+            if (state.current === TState.Entering) {
               onEnterCancelled?.();
             }
-            state.current = 21; // leaving
+            state.current = TState.Leaving;
             setRealEnter(false);
           }
         }
@@ -130,7 +141,7 @@ export const Transition = forwardRef<Element, TransitionProps>(
       <TransitionInner
         isEnter={realEnter}
         onAfterLeave={(el) => {
-          state.current = 22; // leaved
+          state.current = TState.Leaved;
           onAfterLeave?.(el);
           // console.log('AFTER LEAVE');
           if (destroyAfterLeave) {
@@ -138,13 +149,13 @@ export const Transition = forwardRef<Element, TransitionProps>(
           }
         }}
         onAfterEnter={(el) => {
-          state.current = 12; //entered
+          state.current = TState.Entered;
           onAfterEnter?.(el);
         }}
         {...restProps}
         onMounted={(el) => {
           if (isEnter) {
-            state.current = 11; // entering
+            state.current = TState.Entering;
             setRealEnter(true);
           }
           if (typeof ref === 'function') {

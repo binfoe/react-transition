@@ -1,19 +1,17 @@
 import type { FC, Key, ReactElement, ReactNode } from 'react';
-import { cloneElement, useEffect, useMemo, useRef, useState } from 'react';
+import { cloneElement, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { Transition, TransitionProps } from './transition';
 
 interface Item {
   isEnter: boolean;
   key: Key;
-  node: ReactElement;
+  node: ReactElement<TransitionProps, typeof Transition>;
 }
-type TransitionGroupElement = Omit<ReactElement, 'key'> & { key: string };
 
-const W: FC<{ children: ReactNode }> = ({ children }) => {
-  return children;
-};
-function k(children: TransitionGroupElement[], onLeave: (key: Key) => void, appear = false) {
+function k(children: Item['node'][], onLeave: (key: Key) => void, appear = false) {
   return children.map((node) => {
     const key = node.key;
+    if (!key) throw new Error('child of <TransitionGroup> must has "key"');
     const item = cloneElement(node, {
       key,
       isEnter: true,
@@ -26,15 +24,17 @@ function k(children: TransitionGroupElement[], onLeave: (key: Key) => void, appe
       key,
       node: item,
       isEnter: true,
-    };
+    } as Item;
   });
 }
+
 export const TransitionGroup: FC<{
-  children: TransitionGroupElement[];
-}> = ({ children }) => {
-  const memoList = useMemo<Item[]>(() => k(children, onLeave), []);
-  const refList = useRef(memoList);
-  const [renderList, setRenderList] = useState<Item[]>(memoList);
+  children: ReactNode;
+  appear?: boolean;
+}> = ({ children, appear }) => {
+  const initList = useMemo<Item[]>(() => (appear ? [] : k(children as unknown as Item['node'][], onLeave, false)), []);
+  const refList = useRef(initList);
+  const [renderList, setRenderList] = useState<Item[]>(initList);
 
   function onLeave(key: Key) {
     // console.log('AFTER LEAVE', key);
@@ -49,42 +49,41 @@ export const TransitionGroup: FC<{
   }
 
   const first = useRef(true);
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (first.current) {
       first.current = false;
-      return;
+      if (!appear) {
+        return;
+      }
     }
-    const newItems = k(children, onLeave, true);
-    const newKeys = Object.fromEntries(newItems.map((it, i) => [it.key.toString(), i]));
+    const newItems = k(children as unknown as Item['node'][], onLeave, true);
+    const newKeys = new Map();
+    newItems.forEach((it, i) => newKeys.set(it.key.toString(), i));
     // console.log('CCC', newKeys, children.length, refList);
     const oldKeys = new Set();
     refList.current.forEach((old) => {
       oldKeys.add(old.key);
-      const newIdx = newKeys[old.key.toString()];
+      const newIdx = newKeys.get(old.key);
       if (newIdx === undefined) {
         if (old.isEnter) {
           old.isEnter = false;
-          old.node = cloneElement(old.node, { isEnter: false });
+          old.node = cloneElement(old.node, { isEnter: false }) as Item['node'];
           // console.log('REMOVE', old.node);
         }
       } else {
         old.isEnter = true;
-        old.node = cloneElement(newItems[newIdx].node, { isEnter: true });
+        old.node = cloneElement(newItems[newIdx].node, { isEnter: true }) as Item['node'];
+        // console.log('Keep', old);
       }
     });
     newItems.forEach((item) => {
       if (!oldKeys.has(item.key)) {
         refList.current.push(item);
+        // console.log('ADD', item);
       }
     });
     setRenderList(refList.current.slice());
   }, [children]);
 
-  return (
-    <>
-      {renderList.map((item) => (
-        <W key={item.key}>{item.node}</W>
-      ))}
-    </>
-  );
+  return renderList.map((item) => item.node);
 };

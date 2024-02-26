@@ -8,7 +8,9 @@
 pnpm install reactrans
 ```
 
-## Usage
+## Transition
+
+### Usage
 
 ```tsx
 import { Transition } from 'reactrans';
@@ -34,7 +36,7 @@ export const Demo: FC = () => {
 };
 ```
 
-## Properties
+### Properties
 
 属性参数
 
@@ -44,6 +46,7 @@ export const Demo: FC = () => {
 - `enterActive`enter 开始时的激活 classname，用于控制 enter 和 leave 使用不同动画。可选参数，默认为空。
 - `leaveActive`leave 开始时的激活 classname，用于控制 enter 和 leave 使用不同动画。可选参数，默认为空。
 - `destroyAfterLeave` 是否在 leave 动画后销毁 DOM。可选参数，默认 false。
+- `appear` 是否在首次渲染时展示动画。可选参数默认 false。
 
 回调参数
 
@@ -51,3 +54,42 @@ export const Demo: FC = () => {
 - `onEnterCancelled`: (el) => void;
 - `onAfterLeave`: (el) => void;
 - `onLeaveCancelled`: (el) => void;
+
+## Transition-Group
+
+### Usage
+
+```tsx
+import { TransitionGroup, Transition } from 'reactrans';
+
+export const DemoList: FC = () => {
+  const tt = useState(['a', 'b']);
+  return (
+    <>
+      <button onClick={() => setTt((v) => [...v, Date.now().toString(32)])}>Add Item</button>
+      <TransitionGroup>
+        {tt.map((t, i) => (
+          <Transition key={t} enter="opacity-100" leave=" opacity-0">
+            <div
+              onClick={() => {
+                setTt((v) => {
+                  const nv = v.slice();
+                  nv.splice(i, 1);
+                  return nv;
+                });
+              }}
+              className="py-2 transition-all duration-[5s]"
+            >
+              {t}
+            </div>
+          </Transition>
+        ))}
+      </TransitionGroup>
+    </>
+  );
+};
+```
+
+### Properties
+
+- `appear` 是否在首次渲染时展示动画。可选参数，默认 false。
