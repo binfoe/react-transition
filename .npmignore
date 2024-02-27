@@ -2,14 +2,6 @@ node_modules
 /.idea
 /.tmp
 /.vscode
-.antlr
-**/.DS_Store
-/build
-.gitignore
-.eslintignore
-.eslintrc.json
-.jshintignore
-.jshintrc
-.jshint
-.jshint.json
-
+/scripts
+.npmrc
+.npmignore
